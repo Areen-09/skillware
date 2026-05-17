@@ -22,9 +22,9 @@ In integration, a "Skill" is not just a function. It is a living unit of capabil
 
 ### 3. The Conscience (Governance)
 *   **What it is**: The Constitution and Manifest.
-*   **Role**: Defines the boundaries. "Do not output PII", "Do not give financial advice".
+*   **Role**: Defines the boundaries. "Do not output PII", "Do not give financial advice". Records **issuer attribution** (who created or maintains the skill).
 *   **File**: `manifest.yaml`
-*   **Design**: Enforced at the prompt level.
+*   **Design**: Enforced at the prompt level. Issuer metadata (`name`, `email`, and optionally `github` / `org`) is for humans and catalog UIs—it is not passed to LLM tool schemas.
 
 ---
 
@@ -37,10 +37,11 @@ Skillware/
 ├── skills/
 │   └── category/                   # Domain boundary (e.g., 'finance')
 │       └── skill_name/             # A self-contained capability bundle
-│           ├── manifest.yaml       # Defines inputs, outputs, and safety constitution
+│           ├── manifest.yaml       # Inputs, outputs, constitution, and issuer attribution
 │           ├── skill.py            # The deterministic Python execution logic
 │           ├── instructions.md     # Natural language guidance for the LLM
-│           └── card.json           # Optional UI representation for the front-end
+│           ├── card.json           # Optional UI card (may mirror manifest issuer)
+│           └── test_skill.py       # Unit tests for the skill bundle
 └── skillware/
     └── core/
         ├── base_skill.py           # The interface every skill must implement
@@ -53,7 +54,7 @@ When you run `SkillLoader.load_skill("category/skill_name")`, a complex orchestr
 ### Step 1: Discovery & Loading
 The loader scans the `skills/` directory structure. It mimics Python's import system but looking for Skillware bundles (directories with `manifest.yaml`).
 *   It dynamically imports the `skill.py` module.
-*   It parses the `manifest.yaml`.
+*   It parses the `manifest.yaml` (including `issuer` for attribution, separate from tool-calling fields).
 *   It reads `instructions.md` and `card.json`.
 
 ### Step 2: Adaptation (The "Babel Fish")

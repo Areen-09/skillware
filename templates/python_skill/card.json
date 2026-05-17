@@ -1,6 +1,12 @@
 {
     "name": "My Skill",
     "description": "A template description.",
+    "issuer": {
+        "name": "Your Name",
+        "email": "you@example.com",
+        "github": "your_github_username",
+        "org": "YOUR ORG"
+    },
     "icon": "zap",
     "color": "gray",
     "ui_schema": {

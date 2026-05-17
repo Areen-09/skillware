@@ -1,6 +1,7 @@
 # PDF Form Filler Skill
 
 **ID**: `office/pdf_form_filler`
+**Issuer**: [@rosspeili](https://github.com/rosspeili) ([@ARPAHLS](https://github.com/ARPAHLS))
 
 A productivity skill that fills AcroForm-based PDFs by mapping natural language instructions to detected form fields using semantic understanding.
 

@@ -1,6 +1,11 @@
 name: "optimization/prompt_rewriter"
 version: "0.1.0"
 description: "A powerful middleware skill that aggressively compresses massive, bloated prompts into fewer tokens while retaining 100% of the semantic meaning and instructions."
+issuer:
+  name: Ross Peili
+  email: vpeilivanidis@gmail.com
+  github: rosspeili
+  org: ARPAHLS
 category: "optimization"
 parameters:
   type: object

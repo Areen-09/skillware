@@ -1,6 +1,12 @@
 {
     "name": "TOS Evaluator",
     "description": "Checks robots.txt and legal pages before automated website access.",
+    "issuer": {
+        "name": "Ross Peili",
+        "email": "vpeilivanidis@gmail.com",
+        "github": "rosspeili",
+        "org": "ARPAHLS"
+    },
     "icon": "shield",
     "color": "green",
     "ui_schema": {

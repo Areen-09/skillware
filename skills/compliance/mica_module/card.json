@@ -1,6 +1,12 @@
 {
     "name": "MiCA Module",
     "description": "Evaluate and screen crypto-asset queries against the MiCA regulation.",
+    "issuer": {
+        "name": "Ross Peili",
+        "email": "vpeilivanidis@gmail.com",
+        "github": "rosspeili",
+        "org": "ARPAHLS"
+    },
     "icon": "book-open",
     "color": "#1F618D",
     "ui_schema": {

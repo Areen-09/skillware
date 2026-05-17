@@ -1,6 +1,11 @@
 name: "data_engineering/synthetic_generator"
 version: "0.1.0"
 description: "Generates high-entropy structured synthetic data for model fine-tuning to avoid mode collapse."
+issuer:
+  name: Ross Peili
+  email: vpeilivanidis@gmail.com
+  github: rosspeili
+  org: ARPAHLS
 requirements: []
 parameters:
   type: "object"

@@ -11,6 +11,7 @@ Every new skill must reside in its own directory under `skills/<category>/<skill
 ### 1. `manifest.yaml` (The Metadata)
 Defines the interface and constitution.
 *   **Must** have `name`, `version`, `description`.
+*   **Must** include an `issuer` block identifying who created or maintains the skill (`name` and `email` are required; `github` and `org` are optional but encouraged).
 *   **Must** have a valid JSON Schema in `parameters`.
 *   **Must** include a `constitution` section defining safety boundaries.
 *   **Must** include a `requirements` list if external packages are needed (e.g. `requests`, `pandas`).
@@ -19,6 +20,11 @@ Defines the interface and constitution.
 name: generic_hello
 version: 1.0.0
 description: A friendly greeting skill.
+issuer:
+  name: Your Name
+  email: you@example.com
+  github: your_github_username
+  org: YOUR ORG
 parameters:
   type: object
   properties:
@@ -50,6 +56,26 @@ This is the most critical file. It is the "driver" for the LLM.
 
 ### 4. `card.json` (The Presentation)
 *   Defines how the skill state is rendered in a UI (optional but recommended for user-facing agents).
+*   When present, should include an `issuer` object that matches `manifest.yaml` (same `name` and `email`; copy `github` and `org` when used).
+
+### 5. `test_skill.py` (Validation)
+*   Unit tests for deterministic execution and schema compliance.
+*   Run with `pytest skills/<category>/<skill_name>/test_skill.py`.
+
+### 6. `docs/skills/<skill_name>.md` (Catalog Page)
+*   Document the skill for humans browsing the [Skill Library](docs/skills/README.md).
+*   Include **ID** and **Issuer** near the top (e.g. `[@your_handle](https://github.com/your_handle)` and optional org).
+*   Add or update the skill row in `docs/skills/README.md` when merging a new skill.
+
+#### Issuer attribution
+The manifest is the **source of truth**. Use real contact details—not template placeholders (`Your Name`, `you@example.com`, etc.)—in anything under `skills/`.
+
+| Field | Required | Notes |
+| :--- | :--- | :--- |
+| `issuer.name` | Yes | Display name of the contributor or maintainer |
+| `issuer.email` | Yes | Contact email for the skill author |
+| `issuer.github` | No | GitHub username (without `@`) for profile links |
+| `issuer.org` | No | GitHub org or affiliation (e.g. `ARPAHLS`) |
 
 ---
 
@@ -75,8 +101,9 @@ This is the most critical file. It is the "driver" for the LLM.
     *Wait for approval/feedback before writing code.*
 2.  **Fork** the repository.
 3.  **Create** your skill folder: `skills/<category>/<your_skill>/`.
-4.  **Implement** the 5 required files (`manifest.yaml`, `skill.py`, `instructions.md`, `card.json`, `test_skill.py`).
+4.  **Implement** the skill bundle: `manifest.yaml` (with `issuer`), `skill.py`, `instructions.md`, `card.json`, `test_skill.py`, and `docs/skills/<skill_name>.md`.
 5.  **Verify**: Run linting and tests locally.
+    *   `pytest tests/test_skill_issuer.py` (issuer fields on registry skills)
     *   `pytest skills/<category>/<your_skill>/test_skill.py`
     *   `python -m black .`
     *   `python -m flake8 .`

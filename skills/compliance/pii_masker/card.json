@@ -1,6 +1,12 @@
 {
     "name": "PII Masker",
     "description": "Scrub sensitive PII from text before it hits external logic.",
+    "issuer": {
+        "name": "Ross Peili",
+        "email": "vpeilivanidis@gmail.com",
+        "github": "rosspeili",
+        "org": "ARPAHLS"
+    },
     "icon": "shield",
     "color": "#2E86C1",
     "ui_schema": {

@@ -1,6 +1,12 @@
 {
   "name": "Wallet Audit",
   "description": "Checks crypto wallets for sanctions and malicious activity.",
+  "issuer": {
+    "name": "Ross Peili",
+    "email": "vpeilivanidis@gmail.com",
+    "github": "rosspeili",
+    "org": "ARPAHLS"
+  },
   "icon": "shield-check",
   "color": "indigo",
   "ui_schema": {

@@ -1,6 +1,12 @@
 {
     "name": "Prompt Token Rewriter",
     "description": "Aggressively compresses prompts while retaining semantic meaning.",
+    "issuer": {
+        "name": "Ross Peili",
+        "email": "vpeilivanidis@gmail.com",
+        "github": "rosspeili",
+        "org": "ARPAHLS"
+    },
     "icon": "minimize",
     "color": "purple",
     "ui_schema": {

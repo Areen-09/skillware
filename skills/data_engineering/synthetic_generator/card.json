@@ -1,6 +1,12 @@
 {
     "name": "Synthetic Data Generator",
     "description": "Generates high-entropy structured synthetic data.",
+    "issuer": {
+        "name": "Ross Peili",
+        "email": "vpeilivanidis@gmail.com",
+        "github": "rosspeili",
+        "org": "ARPAHLS"
+    },
     "icon": "database",
     "color": "blue",
     "ui_schema": {

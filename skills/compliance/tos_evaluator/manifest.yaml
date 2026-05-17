@@ -1,6 +1,11 @@
 name: "compliance/tos_evaluator"
 version: "0.1.0"
 description: "Evaluates whether an intended automated website action appears permissible by checking robots.txt, discovered legal pages, and optional low-cost LLM review for ambiguous policy language."
+issuer:
+  name: Ross Peili
+  email: vpeilivanidis@gmail.com
+  github: rosspeili
+  org: ARPAHLS
 category: "compliance"
 parameters:
   type: object

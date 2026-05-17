@@ -1,6 +1,7 @@
 # Wallet Screening Skill
 
 **ID**: `finance/wallet_screening`
+**Issuer**: [@rosspeili](https://github.com/rosspeili) ([@ARPAHLS](https://github.com/ARPAHLS))
 
 A rigorous compliance and risk assessment tool for Ethereum wallets. This skill ports logic from professional forensic tools into the modular Skillware format.
 

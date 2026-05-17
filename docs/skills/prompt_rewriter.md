@@ -2,6 +2,7 @@
 
 **Domain:** `optimization`
 **Skill ID:** `optimization/prompt_rewriter`
+**Issuer:** [@rosspeili](https://github.com/rosspeili) ([@ARPAHLS](https://github.com/ARPAHLS))
 
 A powerful middleware skill that acts as a deterministic compression logic gate for agents. It ingests a massive, bloated prompt or conversation history and "rewrites" it to use fewer tokens while aggressively retaining 100% of the semantic meaning and instructions.
 

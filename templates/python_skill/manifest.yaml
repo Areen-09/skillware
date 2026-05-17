@@ -1,6 +1,11 @@
 name: "my-awesome-skill"
 version: "0.1.0"
 description: "A short description of what this skill does."
+issuer:
+  name: Your Name
+  email: you@example.com
+  github: your_github_username
+  org: YOUR ORG
 category: "utility"
 parameters:
   type: object
