@@ -67,6 +67,7 @@ The `SkillLoader` acts as an adapter.
 *   `SkillLoader.to_gemini_tool(skill)` -> Transmutes the manifest into Gemini's format.
 *   `SkillLoader.to_claude_tool(skill)` -> Transmutes the manifest into Claude's format.
 *   `SkillLoader.to_openai_tool(skill)` -> Transmutes the manifest into OpenAI's tool format.
+*   `SkillLoader.to_deepseek_tool(skill)` -> Transmutes the manifest into DeepSeek's tool format.
 *   `SkillLoader.to_ollama_prompt(skill)` -> Textual tool description for Ollama prompt-based loops.
 
 ### Step 3: Injection
@@ -97,6 +98,7 @@ Skillware is designed to be the "Standard Library" for all agents.
 | **Anthropic Claude** | Native `anthropic` support. XML/JSON handling. |
 | **Ollama** | Native `ollama` Python client support. Fully local JSON handling. |
 | **OpenAI GPT** | `to_openai_tool()`; Chat Completions tool calling. |
+| **DeepSeek** | `to_deepseek_tool()`; separate adapter, OpenAI-compatible client. |
 | **Local LLaMA** | (Planned) GBNF Grammar generation from manifests. |
 
 ---

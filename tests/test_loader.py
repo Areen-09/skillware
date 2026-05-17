@@ -94,3 +94,29 @@ def test_to_openai_tool():
     assert tool["function"]["description"] == "Evaluate site policy."
     assert tool["function"]["parameters"]["type"] == "object"
     assert "target_url" in tool["function"]["parameters"]["properties"]
+
+
+def test_sanitize_deepseek_tool_name():
+    assert (
+        SkillLoader._sanitize_deepseek_tool_name("compliance/tos_evaluator")
+        == "compliance_tos_evaluator"
+    )
+
+
+def test_to_deepseek_tool():
+    dummy_bundle = {
+        "manifest": {
+            "name": "compliance/tos_evaluator",
+            "description": "Evaluate site policy.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "target_url": {"type": "string", "description": "URL"}
+                },
+                "required": ["target_url"],
+            },
+        }
+    }
+    tool = SkillLoader.to_deepseek_tool(dummy_bundle)
+    assert tool["type"] == "function"
+    assert tool["function"]["name"] == "compliance_tos_evaluator"
