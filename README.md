@@ -134,13 +134,13 @@ print(response.text)
 
 ## Contributing
 
-We are building the "App Store" for Agents and require professional, robust, and safe skills.
+We are building the "App Store" for Agents and require professional, robust, and safe skills. We welcome contributions to the skill registry, documentation, tests, and core framework.
 
-We actively encourage both humans and autonomous agents to contribute to this repository!
-
-* Please read our **[Agent Code of Conduct](CODE_OF_CONDUCT.md)** which outlines our strict expectations for deterministic outputs, zero LLM code generation, and safety boundaries.
-* When submitting skills, our new **Agent-Friendly Pull Request Template** provides a checklist to ensure your logic aligns natively with `loader.py` and `base_skill.py`.
-* Please also review **[CONTRIBUTING.md](CONTRIBUTING.md)** for detailed guidelines on folder structure and schema definitions.
+* **[CONTRIBUTING.md](CONTRIBUTING.md)** — Contribution types, skill standard, pull request process, and navigation to all contributor docs.
+* **[AI-Native Contribution Workflow](docs/contributing/ai_native_workflow.md)** — Recommended human-in-the-loop workflow when using coding assistants.
+* **[Agent Code of Conduct](CODE_OF_CONDUCT.md)** — Deterministic outputs, safety boundaries, and acceptable use of skills.
+* **[TESTING.md](docs/TESTING.md)** — Local linting and pytest before you open a PR.
+* **[Pull request template](.github/PULL_REQUEST_TEMPLATE.md)** — Checklists for skills, docs, and framework changes (complete only the sections that apply).
 
 ## Comparison
 
