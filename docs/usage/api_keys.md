@@ -163,4 +163,5 @@ Skills that talk only to `localhost` (for example a local Ollama instance) may n
 - [Usage: Gemini](gemini.md) — agent-side `GOOGLE_API_KEY`
 - [Usage: Claude](claude.md) — agent-side `ANTHROPIC_API_KEY`
 - [Usage: OpenAI](openai.md) — agent-side `OPENAI_API_KEY`
+- [Usage: DeepSeek](deepseek.md) — agent-side `DEEPSEEK_API_KEY`
 - [Skill library](../skills/README.md) — per-skill environment requirements

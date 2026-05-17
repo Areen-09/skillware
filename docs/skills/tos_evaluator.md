@@ -86,6 +86,10 @@ Use the skill through `SkillLoader.to_claude_tool(...)` and return the structure
 
 Use `SkillLoader.to_openai_tool(...)` and match tool calls on the sanitized function name (for example `compliance_tos_evaluator`). See `examples/openai_tos_evaluator.py`.
 
+## DeepSeek Example
+
+Use `SkillLoader.to_deepseek_tool(...)` with the DeepSeek API base URL and `DEEPSEEK_API_KEY`. See `examples/deepseek_tos_evaluator.py`.
+
 ## Ollama Example
 
 Use the text-based prompt adapter from `SkillLoader.to_ollama_prompt(...)` and execute the skill locally when the model emits a JSON tool block. See `examples/ollama_tos_evaluator.py`.

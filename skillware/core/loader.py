@@ -128,10 +128,10 @@ class SkillLoader:
         return {"name": name, "description": description, "input_schema": parameters}
 
     @staticmethod
-    def _sanitize_openai_tool_name(name: str) -> str:
+    def _sanitize_function_tool_name(name: str) -> str:
         """
-        OpenAI function names allow letters, digits, underscores, and hyphens (max 64 chars).
-        Manifest IDs such as compliance/tos_evaluator are normalized for the tools API.
+        Normalizes manifest tool IDs for OpenAI-compatible function-calling APIs.
+        Allows letters, digits, underscores, and hyphens (max 64 characters).
         """
         if not name or not str(name).strip():
             return "unknown_tool"
@@ -140,6 +140,14 @@ class SkillLoader:
         if not safe:
             return "unknown_tool"
         return safe[:64]
+
+    @staticmethod
+    def _sanitize_openai_tool_name(name: str) -> str:
+        return SkillLoader._sanitize_function_tool_name(name)
+
+    @staticmethod
+    def _sanitize_deepseek_tool_name(name: str) -> str:
+        return SkillLoader._sanitize_function_tool_name(name)
 
     @staticmethod
     def to_openai_tool(skill_bundle: Dict[str, Any]) -> Dict[str, Any]:
@@ -156,6 +164,27 @@ class SkillLoader:
             "type": "function",
             "function": {
                 "name": SkillLoader._sanitize_openai_tool_name(raw_name),
+                "description": description,
+                "parameters": parameters,
+            },
+        }
+
+    @staticmethod
+    def to_deepseek_tool(skill_bundle: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Converts a skill manifest to a DeepSeek API tool definition.
+        DeepSeek uses an OpenAI-compatible tools schema; this adapter is separate from
+        to_openai_tool() by design. See: https://api-docs.deepseek.com/
+        """
+        manifest = skill_bundle.get("manifest", {})
+        raw_name = manifest.get("name", "unknown_tool")
+        description = manifest.get("description", "")
+        parameters = manifest.get("parameters", {})
+
+        return {
+            "type": "function",
+            "function": {
+                "name": SkillLoader._sanitize_deepseek_tool_name(raw_name),
                 "description": description,
                 "parameters": parameters,
             },

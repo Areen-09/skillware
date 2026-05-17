@@ -134,6 +134,7 @@ print(response.choices[0].message.content)
 ## Related documents
 
 - [API keys for skills](api_keys.md)
+- [Usage: DeepSeek](deepseek.md) (separate adapter)
 - [Usage: Gemini](gemini.md)
 - [Usage: Claude](claude.md)
 - [Usage: Ollama](ollama.md) (separate prompt-based integration)
