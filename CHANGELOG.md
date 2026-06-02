@@ -8,9 +8,6 @@ Contributors add user-facing entries under `[Unreleased]` in the same PR. Mainta
 
 ## [Unreleased]
 
-### Added
-- **`defi/evm_tx_handler`**: EVM agent wallet skill for structured resolve, Uni V2 quote/preview, transfer, balances, and wallet info on Ethereum and Base (#142). Swap `execute` follows in the same PR series.
-
 ## [0.3.3] - 2026-05-29
 
 ### Added

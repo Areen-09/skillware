@@ -27,7 +27,7 @@ jobs:
         pip install flake8 pytest pytest-mock
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         # Attempt to install skill dependencies manually for now (since we don't have a single setup.py yet)
-        pip install pymupdf anthropic requests "web3>=6.0.0"
+        pip install pymupdf anthropic requests
 
     - name: Lint with flake8
       run: |
@@ -41,4 +41,4 @@ jobs:
         ANTHROPIC_API_KEY: "dummy_key_for_ci"
         ETHERSCAN_API_KEY: "dummy_key_for_ci"
       run: |
-        pytest tests/ skills/defi/evm_tx_handler/test_skill.py
+        pytest tests/
