@@ -11,6 +11,7 @@ Contributors add user-facing entries under `[Unreleased]` in the same PR. Mainta
 ### Changed
 - **CI**: GitHub Actions installs dependencies from `pyproject.toml` only (`pip install -e ".[dev,all]"`); removed redundant manual pip pins. CI runs `pytest tests/` only; co-located `skills/**/test_skill.py` remains a local pre-PR step (#151).
 - **Documentation**: [TESTING.md](docs/TESTING.md) and [CONTRIBUTING.md](CONTRIBUTING.md) aligned with CI scope and local skill-test workflow (#151).
+- **Documentation**: Updated [COMPARISON.md](COMPARISON.md) and README for Agent Skills (SKILL.md) open standard and fairer MCP framing ([Docs]: Light refresh of COMPARISON.md #123).
 
 ## [0.3.3] - 2026-05-29
 
