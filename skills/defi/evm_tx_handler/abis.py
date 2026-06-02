@@ -21,6 +21,69 @@ ROUTER_V2_ABI = [
         ],
         "outputs": [{"name": "amounts", "type": "uint256[]"}],
     },
+    {
+        "name": "swapExactTokensForTokens",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [
+            {"name": "amountIn", "type": "uint256"},
+            {"name": "amountOutMin", "type": "uint256"},
+            {"name": "path", "type": "address[]"},
+            {"name": "to", "type": "address"},
+            {"name": "deadline", "type": "uint256"},
+        ],
+        "outputs": [{"name": "amounts", "type": "uint256[]"}],
+    },
+    {
+        "name": "swapTokensForExactTokens",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [
+            {"name": "amountOut", "type": "uint256"},
+            {"name": "amountInMax", "type": "uint256"},
+            {"name": "path", "type": "address[]"},
+            {"name": "to", "type": "address"},
+            {"name": "deadline", "type": "uint256"},
+        ],
+        "outputs": [{"name": "amounts", "type": "uint256[]"}],
+    },
+    {
+        "name": "swapExactETHForTokens",
+        "type": "function",
+        "stateMutability": "payable",
+        "inputs": [
+            {"name": "amountOutMin", "type": "uint256"},
+            {"name": "path", "type": "address[]"},
+            {"name": "to", "type": "address"},
+            {"name": "deadline", "type": "uint256"},
+        ],
+        "outputs": [{"name": "amounts", "type": "uint256[]"}],
+    },
+    {
+        "name": "swapETHForExactTokens",
+        "type": "function",
+        "stateMutability": "payable",
+        "inputs": [
+            {"name": "amountOut", "type": "uint256"},
+            {"name": "path", "type": "address[]"},
+            {"name": "to", "type": "address"},
+            {"name": "deadline", "type": "uint256"},
+        ],
+        "outputs": [{"name": "amounts", "type": "uint256[]"}],
+    },
+    {
+        "name": "swapExactTokensForETH",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [
+            {"name": "amountIn", "type": "uint256"},
+            {"name": "amountOutMin", "type": "uint256"},
+            {"name": "path", "type": "address[]"},
+            {"name": "to", "type": "address"},
+            {"name": "deadline", "type": "uint256"},
+        ],
+        "outputs": [{"name": "amounts", "type": "uint256[]"}],
+    },
 ]
 
 ERC20_ABI = [
@@ -39,6 +102,26 @@ ERC20_ABI = [
         "outputs": [{"name": "", "type": "uint8"}],
     },
     {
+        "name": "allowance",
+        "type": "function",
+        "stateMutability": "view",
+        "inputs": [
+            {"name": "owner", "type": "address"},
+            {"name": "spender", "type": "address"},
+        ],
+        "outputs": [{"name": "", "type": "uint256"}],
+    },
+    {
+        "name": "approve",
+        "type": "function",
+        "stateMutability": "nonpayable",
+        "inputs": [
+            {"name": "spender", "type": "address"},
+            {"name": "amount", "type": "uint256"},
+        ],
+        "outputs": [{"name": "", "type": "bool"}],
+    },
+    {
         "name": "transfer",
         "type": "function",
         "stateMutability": "nonpayable",
@@ -49,3 +132,5 @@ ERC20_ABI = [
         "outputs": [{"name": "", "type": "bool"}],
     },
 ]
+
+MAX_UINT256 = 2**256 - 1

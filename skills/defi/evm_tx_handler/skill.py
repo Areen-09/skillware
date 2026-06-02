@@ -1,6 +1,6 @@
 """
-EVM transaction handler — PR1: resolve, quote, preview, transfer, balances,
-wallet_info, update_preferences. Swap execute() ships in PR2.
+EVM transaction handler — structured intent, Uni V2 quote/preview/execute,
+transfer, balances, and wallet info for a dedicated agent wallet.
 """
 
 from __future__ import annotations
@@ -13,6 +13,7 @@ import time
 from decimal import Decimal, ROUND_DOWN
 from typing import Any, Dict, List, Optional, Tuple
 
+import requests
 import yaml
 from eth_account import Account
 from web3 import Web3
@@ -23,7 +24,9 @@ from skillware.core.base_skill import BaseSkill
 _SKILL_DIR = os.path.dirname(os.path.abspath(__file__))
 if _SKILL_DIR not in sys.path:
     sys.path.insert(0, _SKILL_DIR)
-from abis import ERC20_ABI, ROUTER_V2_ABI  # noqa: E402
+from abis import ERC20_ABI, MAX_UINT256, ROUTER_V2_ABI  # noqa: E402
+
+_COINGECKO_PLATFORM = {"ethereum": "ethereum", "base": "base"}
 
 _ETH_ADDRESS_RE = re.compile(r"^0x[a-fA-F0-9]{40}$")
 _SENSITIVE_ENV_SUFFIXES = ("PRIVATE_KEY", "SECRET", "MNEMONIC")
@@ -393,7 +396,95 @@ class EvmTxHandlerSkill(BaseSkill):
             "gas_estimate": gas,
             "side": resolved["side"],
             "chain": chain,
+            "amount_kind": amount_kind,
         }
+
+    @staticmethod
+    def _quote_api_payload(quote: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "path": quote["path"],
+            "amount_in_wei": quote["amount_in_wei"],
+            "amount_out_wei": quote["amount_out_wei"],
+            "min_out_wei": quote["min_out_wei"],
+            "deadline": quote["deadline"],
+        }
+
+    def _coingecko_headers(self) -> Dict[str, str]:
+        headers: Dict[str, str] = {"Accept": "application/json"}
+        api_key = os.environ.get("COINGECKO_API_KEY") or (self.config or {}).get(
+            "COINGECKO_API_KEY"
+        )
+        if api_key:
+            headers["x-cg-pro-api-key"] = str(api_key)
+        return headers
+
+    def _coingecko_usd_unit_price(self, chain: str, token: Dict[str, Any]) -> Optional[float]:
+        if chain not in _COINGECKO_PLATFORM:
+            return None
+        try:
+            if token.get("native"):
+                response = requests.get(
+                    "https://api.coingecko.com/api/v3/simple/price",
+                    params={"ids": "ethereum", "vs_currencies": "usd"},
+                    headers=self._coingecko_headers(),
+                    timeout=10,
+                )
+                response.raise_for_status()
+                return float(response.json()["ethereum"]["usd"])
+
+            platform = _COINGECKO_PLATFORM[chain]
+            address = token["address"].lower()
+            response = requests.get(
+                f"https://api.coingecko.com/api/v3/simple/token_price/{platform}",
+                params={"contract_addresses": address, "vs_currencies": "usd"},
+                headers=self._coingecko_headers(),
+                timeout=10,
+            )
+            response.raise_for_status()
+            data = response.json()
+            for key, value in data.items():
+                if key.lower() == address:
+                    return float(value["usd"])
+            return None
+        except (requests.RequestException, KeyError, TypeError, ValueError):
+            return None
+
+    def _usd_for_token_amount(
+        self, chain: str, token: Dict[str, Any], amount_wei: int
+    ) -> Optional[float]:
+        unit = self._coingecko_usd_unit_price(chain, token)
+        if unit is None:
+            return None
+        human = Decimal(amount_wei) / Decimal(10 ** int(token["decimals"]))
+        return float(human * Decimal(str(unit)))
+
+    def _enforce_max_trade_usd(self, quote: Dict[str, Any]) -> None:
+        cap = self.user_config.get("max_trade_usd")
+        if cap is None:
+            return
+        pay_usd = self._usd_for_token_amount(
+            quote["chain"], quote["token_in"], int(quote["amount_in_wei"])
+        )
+        if pay_usd is None:
+            raise ValueError(
+                "max_trade_usd is configured but USD price for the pay asset is unavailable. "
+                "Set COINGECKO_API_KEY or retry later."
+            )
+        if pay_usd > float(cap):
+            raise ValueError(
+                f"Trade pay amount ${pay_usd:.2f} exceeds max_trade_usd ${float(cap):.2f}."
+            )
+
+    def _preview_usd(self, quote: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        pay = self._usd_for_token_amount(
+            quote["chain"], quote["token_in"], int(quote["amount_in_wei"])
+        )
+        receive = self._usd_for_token_amount(
+            quote["chain"], quote["token_out"], int(quote["amount_out_wei"])
+        )
+        if pay is None and receive is None:
+            return None
+        return {"pay": pay, "receive": receive}
 
     def _preview_from_quote(self, quote: Dict[str, Any]) -> Dict[str, Any]:
         tin, tout = quote["token_in"], quote["token_out"]
@@ -406,7 +497,7 @@ class EvmTxHandlerSkill(BaseSkill):
                 f"{format(Decimal(recv_amt) / Decimal(pay_amt), 'f')} {tout['symbol']}"
             )
 
-        return {
+        preview: Dict[str, Any] = {
             "side": quote["side"],
             "chain": quote["chain"],
             "you_pay": {"asset": tin["symbol"], "amount": pay_amt},
@@ -414,11 +505,12 @@ class EvmTxHandlerSkill(BaseSkill):
             "rate": rate,
             "gas_estimate": quote["gas_estimate"],
             "router": "uniswap_v2",
-            "warnings": [
-                "Rates are indicative; slippage may apply.",
-                "Swap execution is not enabled in PR1.",
-            ],
+            "warnings": ["Rates are indicative; slippage may apply."],
         }
+        usd = self._preview_usd(quote)
+        if usd is not None:
+            preview["usd"] = usd
+        return preview
 
     def _action_quote(self, intent: Dict[str, Any], _params: Dict[str, Any]) -> Dict[str, Any]:
         resolved = self._merge_intent(intent)
@@ -429,18 +521,13 @@ class EvmTxHandlerSkill(BaseSkill):
             return self._error(f"Cannot quote; missing fields: {', '.join(missing)}.")
 
         quote = self._build_quote(resolved)
+        self._enforce_max_trade_usd(quote)
         preview = self._preview_from_quote(quote)
         confirm = bool(self.user_config.get("confirm_before_send", True))
         return {
             "status": "ready",
             "preview": preview,
-            "quote": {
-                "path": quote["path"],
-                "amount_in_wei": quote["amount_in_wei"],
-                "amount_out_wei": quote["amount_out_wei"],
-                "min_out_wei": quote["min_out_wei"],
-                "deadline": quote["deadline"],
-            },
+            "quote": self._quote_api_payload(quote),
             "requires_confirmation": confirm,
         }
 
@@ -454,18 +541,135 @@ class EvmTxHandlerSkill(BaseSkill):
             "requires_confirmation": result.get("requires_confirmation", True),
         }
 
-    def _action_execute(self, _intent: Dict[str, Any], params: Dict[str, Any]) -> Dict[str, Any]:
+    def _base_tx_params(
+        self, w3: Web3, chain: str, policy: str, from_address: str
+    ) -> Dict[str, Any]:
+        max_fee, priority = self._eip1559_fees(w3, policy)
+        return {
+            "from": from_address,
+            "chainId": int(self.chains[chain]["chain_id"]),
+            "nonce": w3.eth.get_transaction_count(from_address),
+            "maxFeePerGas": max_fee,
+            "maxPriorityFeePerGas": priority,
+        }
+
+    def _approve_router_if_needed(
+        self,
+        w3: Web3,
+        chain: str,
+        token_address: str,
+        router_address: str,
+        amount_wei: int,
+        policy: str,
+        owner: str,
+    ) -> Optional[str]:
+        erc20 = w3.eth.contract(address=token_address, abi=ERC20_ABI)
+        allowance = erc20.functions.allowance(owner, router_address).call()
+        if allowance >= amount_wei:
+            return None
+        base = self._base_tx_params(w3, chain, policy, owner)
+        tx = erc20.functions.approve(router_address, MAX_UINT256).build_transaction(base)
+        return self._sign_and_send(w3, tx)
+
+    def _build_swap_transaction(
+        self,
+        w3: Web3,
+        chain: str,
+        quote: Dict[str, Any],
+        to_address: str,
+        policy: str,
+        from_address: str,
+    ) -> Dict[str, Any]:
+        router = self._router(w3, chain)
+        token_in = quote["token_in"]
+        token_out = quote["token_out"]
+        amount_in = int(quote["amount_in_wei"])
+        amount_out = int(quote["amount_out_wei"])
+        min_out = int(quote["min_out_wei"])
+        path = quote["path"]
+        deadline = quote["deadline"]
+        amount_kind = quote.get("amount_kind", "target_out")
+        base = self._base_tx_params(w3, chain, policy, from_address)
+
+        if token_in.get("native"):
+            if amount_kind == "target_out":
+                return router.functions.swapETHForExactTokens(
+                    amount_out, path, to_address, deadline
+                ).build_transaction({**base, "value": amount_in})
+            return router.functions.swapExactETHForTokens(
+                min_out, path, to_address, deadline
+            ).build_transaction({**base, "value": amount_in})
+
+        if token_out.get("native"):
+            return router.functions.swapExactTokensForETH(
+                amount_in, min_out, path, to_address, deadline
+            ).build_transaction(base)
+
+        if amount_kind == "target_out":
+            return router.functions.swapTokensForExactTokens(
+                amount_out, amount_in, path, to_address, deadline
+            ).build_transaction(base)
+
+        return router.functions.swapExactTokensForTokens(
+            amount_in, min_out, path, to_address, deadline
+        ).build_transaction(base)
+
+    def _action_execute(self, intent: Dict[str, Any], params: Dict[str, Any]) -> Dict[str, Any]:
         need_confirm = self._require_confirmed(params)
         if need_confirm:
             return need_confirm
-        return {
-            "status": "not_available",
-            "code": "pr2_execute",
-            "message": (
-                "Swap execution (execute) ships in PR2. Use quote/preview to plan trades; "
-                "use transfer for sends in PR1."
-            ),
+
+        resolved = self._merge_intent(intent)
+        if resolved.get("side") not in ("buy", "sell"):
+            return self._error("execute requires intent.side buy or sell.")
+        missing = self._missing_for_trade(resolved)
+        if missing:
+            return self._error(f"Cannot execute; missing fields: {', '.join(missing)}.")
+
+        quote = self._build_quote(resolved)
+        self._enforce_max_trade_usd(quote)
+
+        chain = quote["chain"]
+        w3 = self._get_web3(chain)
+        account = self._account()
+        router_address = Web3.to_checksum_address(self.chains[chain]["router_v2"])
+        policy = resolved.get("gas_policy", "normal")
+        amount_in = int(quote["amount_in_wei"])
+
+        approve_tx_hash: Optional[str] = None
+        token_in = quote["token_in"]
+        if not token_in.get("native"):
+            approve_tx_hash = self._approve_router_if_needed(
+                w3,
+                chain,
+                token_in["address"],
+                router_address,
+                amount_in,
+                policy,
+                account.address,
+            )
+            if approve_tx_hash:
+                approve_receipt = self._wait_receipt(w3, approve_tx_hash)
+                if not approve_receipt.get("success"):
+                    return self._error("Router approve transaction failed.")
+
+        swap_tx = self._build_swap_transaction(
+            w3, chain, quote, account.address, policy, account.address
+        )
+        tx_hash = self._sign_and_send(w3, swap_tx)
+        receipt = self._wait_receipt(w3, tx_hash)
+
+        result: Dict[str, Any] = {
+            "status": "confirmed",
+            "tx_hash": tx_hash,
+            "explorer_url": self._explorer_url(chain, tx_hash),
+            "receipt": receipt,
+            "quote": self._quote_api_payload(quote),
         }
+        if approve_tx_hash:
+            result["approve_tx_hash"] = approve_tx_hash
+            result["approve_explorer_url"] = self._explorer_url(chain, approve_tx_hash)
+        return result
 
     # --- Transfer ---
 
@@ -619,7 +823,7 @@ class EvmTxHandlerSkill(BaseSkill):
                 "preview": True,
                 "transfer": True,
                 "balances": True,
-                "execute": False,
+                "execute": True,
             },
         }
 

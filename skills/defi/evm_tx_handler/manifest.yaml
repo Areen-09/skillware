@@ -1,10 +1,9 @@
 name: evm_tx_handler
-version: 0.1.0
+version: 0.2.0
 description: |
-  Operates a dedicated EVM agent wallet for structured buy/sell quotes, previews,
-  and transfers on Ethereum and Base. PR1: resolve, quote, preview, transfer,
-  balances, wallet_info. Swap execution (execute) follows in PR2.
-short_description: "EVM agent wallet — quote, preview, and transfer from structured intent."
+  Operates a dedicated EVM agent wallet for structured buy/sell on Ethereum and Base:
+  resolve, Uni V2 quote/preview/execute, transfer, balances, and wallet info.
+short_description: "EVM agent wallet — quote, swap, and transfer from structured intent."
 category: defi
 issuer:
   name: Hendobox
@@ -31,7 +30,7 @@ parameters:
         Partial or full trade/send intent (side, chain, assets, amount, recipient, gas_policy).
     confirmed:
       type: boolean
-      description: Required true for transfer when confirm_before_send is enabled.
+      description: Required true for execute/transfer when confirm_before_send is enabled.
     preferences:
       type: object
       description: Long-term preference updates (update_preferences only).
@@ -55,8 +54,9 @@ env_vars:
     description: "JSON-RPC URL for Base (required when using chain base)."
     required: false
   COINGECKO_API_KEY:
-    description: "Optional; reserved for USD estimates in later releases."
+    description: "Optional CoinGecko API key for USD estimates and max_trade_usd enforcement."
     required: false
 requirements:
   - web3>=6.0.0
   - pyyaml
+  - requests

@@ -1,4 +1,5 @@
 import os
+import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -6,9 +7,46 @@ import yaml
 
 from skillware.core.loader import SkillLoader
 
-from .skill import EvmTxHandlerSkill
+_SKILL_DIR = os.path.dirname(__file__)
+if _SKILL_DIR not in sys.path:
+    sys.path.insert(0, _SKILL_DIR)
+from abis import ROUTER_V2_ABI  # noqa: E402
+
+from .skill import EvmTxHandlerSkill  # noqa: E402
 
 TEST_KEY = "0x" + "11" * 32
+
+
+def _mock_w3_for_erc20_swap(*, allowance: int = 0):
+    w3 = MagicMock()
+    w3.eth.gas_price = 10**9
+    w3.eth.get_transaction_count.return_value = 0
+    w3.to_wei.side_effect = lambda val, unit: int(val * 10**9) if unit == "gwei" else val
+
+    router = MagicMock()
+    router.functions.getAmountsIn.return_value.call.return_value = [
+        100_000_000,
+        10_000_000_000_000_000_000,
+    ]
+    router.functions.swapTokensForExactTokens.return_value.build_transaction.return_value = {
+        "to": "0x4752ba5DBC23f44d87826276bf6fd6b1c372aD24",
+        "gas": 250000,
+    }
+
+    erc20 = MagicMock()
+    erc20.functions.allowance.return_value.call.return_value = allowance
+    erc20.functions.approve.return_value.build_transaction.return_value = {
+        "to": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+        "gas": 60000,
+    }
+
+    def contract_factory(address=None, abi=None):
+        if abi == ROUTER_V2_ABI:
+            return router
+        return erc20
+
+    w3.eth.contract.side_effect = contract_factory
+    return w3
 
 
 @pytest.fixture
@@ -116,18 +154,6 @@ def test_quote_sell(mock_web3, skill):
     assert result["preview"]["side"] == "sell"
 
 
-def test_execute_not_available_pr1(skill):
-    result = skill.execute(
-        {
-            "action": "execute",
-            "intent": {"side": "buy", "chain": "base", "target_asset": "degen", "spend_asset": "usdc"},
-            "confirmed": True,
-        }
-    )
-    assert result["status"] == "not_available"
-    assert result["code"] == "pr2_execute"
-
-
 def test_execute_needs_confirmation_when_enabled(skill):
     result = skill.execute(
         {
@@ -137,6 +163,110 @@ def test_execute_needs_confirmation_when_enabled(skill):
         }
     )
     assert result["status"] == "needs_confirmation"
+
+
+@patch.object(EvmTxHandlerSkill, "_wait_receipt")
+@patch.object(EvmTxHandlerSkill, "_sign_and_send")
+@patch.object(EvmTxHandlerSkill, "_get_web3")
+def test_execute_buy_with_approve(mock_web3, mock_send, mock_receipt, skill):
+    mock_web3.return_value = _mock_w3_for_erc20_swap(allowance=0)
+    mock_send.side_effect = ["0xapprovehash", "0xswaphash"]
+    mock_receipt.return_value = {"block_number": 1, "gas_used": 250000, "success": True}
+
+    result = skill.execute(
+        {
+            "action": "execute",
+            "confirmed": True,
+            "intent": {
+                "side": "buy",
+                "chain": "base",
+                "target_asset": "degen",
+                "spend_asset": "usdc",
+                "amount": 10,
+                "amount_kind": "target_out",
+            },
+        }
+    )
+    assert result["status"] == "confirmed"
+    assert result["tx_hash"] == "0xswaphash"
+    assert result["approve_tx_hash"] == "0xapprovehash"
+    assert mock_send.call_count == 2
+    assert "quote" in result
+
+
+@patch.object(EvmTxHandlerSkill, "_wait_receipt")
+@patch.object(EvmTxHandlerSkill, "_sign_and_send")
+@patch.object(EvmTxHandlerSkill, "_get_web3")
+def test_execute_buy_skips_approve_when_allowance_sufficient(
+    mock_web3, mock_send, mock_receipt, skill
+):
+    mock_web3.return_value = _mock_w3_for_erc20_swap(allowance=10**30)
+    mock_send.return_value = "0xswaphash"
+    mock_receipt.return_value = {"block_number": 1, "gas_used": 250000, "success": True}
+
+    result = skill.execute(
+        {
+            "action": "execute",
+            "confirmed": True,
+            "intent": {
+                "side": "buy",
+                "chain": "base",
+                "target_asset": "degen",
+                "spend_asset": "usdc",
+                "amount": 10,
+                "amount_kind": "target_out",
+            },
+        }
+    )
+    assert result["status"] == "confirmed"
+    assert "approve_tx_hash" not in result
+    mock_send.assert_called_once()
+
+
+@patch.object(EvmTxHandlerSkill, "_get_web3")
+@patch.object(EvmTxHandlerSkill, "_usd_for_token_amount", return_value=1000.0)
+def test_max_trade_usd_blocks_quote(mock_usd, mock_web3, skill):
+    skill.user_config["max_trade_usd"] = 500
+    mock_web3.return_value = _mock_w3_for_erc20_swap()
+
+    result = skill.execute(
+        {
+            "action": "quote",
+            "intent": {
+                "side": "buy",
+                "chain": "base",
+                "target_asset": "degen",
+                "spend_asset": "usdc",
+                "amount": 10,
+                "amount_kind": "target_out",
+            },
+        }
+    )
+    assert result["status"] == "error"
+    assert "max_trade_usd" in result["message"]
+
+
+@patch.object(EvmTxHandlerSkill, "_get_web3")
+@patch.object(EvmTxHandlerSkill, "_usd_for_token_amount", return_value=None)
+def test_max_trade_usd_fail_closed_without_price(mock_usd, mock_web3, skill):
+    skill.user_config["max_trade_usd"] = 500
+    mock_web3.return_value = _mock_w3_for_erc20_swap()
+
+    result = skill.execute(
+        {
+            "action": "quote",
+            "intent": {
+                "side": "buy",
+                "chain": "base",
+                "target_asset": "degen",
+                "spend_asset": "usdc",
+                "amount": 10,
+                "amount_kind": "target_out",
+            },
+        }
+    )
+    assert result["status"] == "error"
+    assert "USD price" in result["message"]
 
 
 def test_missing_rpc_fail_closed(skill, monkeypatch):
@@ -278,6 +408,7 @@ def test_update_preferences(skill, tmp_path):
 def test_wallet_info_no_secrets(skill):
     result = skill.execute({"action": "wallet_info", "intent": {}})
     assert result["status"] == "ready"
+    assert result["capabilities"]["execute"] is True
     assert "address" in result
     body = str(result)
     assert TEST_KEY not in body
