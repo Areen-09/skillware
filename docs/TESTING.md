@@ -31,7 +31,7 @@ Run Black on the entire repository to automatically fix formatting issues:
 python -m black .
 ```
 
-Black is recommended locally before opening a PR. CI does not gate on Black yet; a future release may add `black --check` after the codebase is fully formatted.
+Run `python -m black --check .` to verify formatting without writing files. GitHub Actions runs the same check before flake8 and pytest.
 
 ## 2. Linting (Flake8)
 
@@ -89,7 +89,7 @@ Install any packages listed in the skill's `manifest.yaml` `requirements` before
 Before pushing your code, run the following commands to ensure your changes are ready for review:
 
 1. `skillware list` (Verify install and path resolution are working)
-2. `python -m black .` (Format code)
+2. `python -m black --check .` (Verify formatting; use `python -m black .` to fix)
 3. `python -m flake8 .` (Check quality)
 4. `python -m pytest tests/` (Verify framework functionality — same scope as CI)
 5. `python -m pytest skills/<category>/<skill_name>/test_skill.py` when your PR touches that skill (local only)
