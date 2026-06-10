@@ -8,6 +8,9 @@ Contributors add user-facing entries under `[Unreleased]` in the same PR. Mainta
 
 ## [Unreleased]
 
+### Added
+- **Tests**: Backfilled `test_skill.py` for six registry skills (`mica_module`, `pii_masker`, `synthetic_generator`, `wallet_screening`, `pdf_form_filler`, `prompt_rewriter`); all registry skills now ship co-located bundle tests. Fixed `prompt_rewriter` package export so pytest can collect the bundle (#158).
+
 ### Changed
 - **CI**: CodeQL GitHub Action upgraded from v3 to v4.
 - **Dependencies**: Extended `[all]` with registry skill runtime deps (`web3`, `fastembed`, `numpy`); added `[defi]` and `[embeddings]` optional extras. Documented manifest ↔ `pyproject.toml` convention in CONTRIBUTING and TESTING.md.
