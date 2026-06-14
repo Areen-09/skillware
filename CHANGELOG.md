@@ -10,6 +10,7 @@ Contributors add user-facing entries under `[Unreleased]` in the same PR. Mainta
 
 ### Added
 - **Tests**: Backfilled `test_skill.py` for six registry skills (`mica_module`, `pii_masker`, `synthetic_generator`, `wallet_screening`, `pdf_form_filler`, `prompt_rewriter`); all registry skills now ship co-located bundle tests. Fixed `prompt_rewriter` package export so pytest can collect the bundle (#158).
+- **CLI**: `skillware/__main__.py` enables `python -m skillware` as a fallback when the `skillware` command is not on PATH (#135). Added `cmd_help()` for rich-formatted help, wired to `skillware --help`/`-h` and interactive menu option `4`. Added `--version`/`-V` flag.
 
 ### Fixed
 - **`novelty_extractor`**: Bundle tests mock fastembed embeddings so CI avoids HuggingFace downloads and rate limits (#159 follow-up).
@@ -19,6 +20,7 @@ Contributors add user-facing entries under `[Unreleased]` in the same PR. Mainta
 - **CI**: CodeQL GitHub Action upgraded from v3 to v4.
 - **Dependencies**: Extended `[all]` with registry skill runtime deps (`web3`, `fastembed`, `numpy`); added `[defi]` and `[embeddings]` optional extras. Documented manifest ↔ `pyproject.toml` convention in CONTRIBUTING and TESTING.md.
 - **Documentation**: [TESTING.md](docs/TESTING.md), [CONTRIBUTING.md](CONTRIBUTING.md), [ai_native_workflow.md](docs/contributing/ai_native_workflow.md), and README architecture tree document the bundle / framework / maintainer / example testing model. Pytest collects `tests/` and `skills/` only (`examples/` ignored).
+- **Dependencies**: Moved `rich>=13.0` from `[cli]` extra to core dependencies; CLI is now available immediately after `pip install skillware`. The `[cli]` extra is kept as an empty deprecated alias for backward compatibility (#135).
 
 ## [0.3.5] - 2026-06-05
 

@@ -182,6 +182,14 @@ def cmd_help(console=None) -> None:
     console.print("  test      coming in #83", style="dim")
     console.print()
 
+    console.print(Text("Interactive mode", style=f"bold {TABLE_STYLE}"))
+    console.print(
+        "  skillware                     — open interactive menu", style="dim"
+    )
+    console.print("  1-4 or command name           — select a menu option", style="dim")
+    console.print("  q or Ctrl+C                   — exit", style="dim")
+    console.print()
+
     console.print(Text("Examples", style=f"bold {TABLE_STYLE}"))
     console.print("  skillware list --category compliance", style=MENU_STYLE)
     console.print("  skillware list --issuer rosspeili", style=MENU_STYLE)
@@ -285,7 +293,14 @@ def main() -> None:
     """CLI entry point."""
     emit_upgrade_advisory()
 
-    parser = argparse.ArgumentParser(prog="skillware")
+    parser = argparse.ArgumentParser(prog="skillware", add_help=False)
+
+    parser.add_argument(
+        "-h",
+        "--help",
+        action="store_true",
+        help="Show this help message and exit.",
+    )
 
     _ver = get_installed_version()
     _version_str = str(_ver) if _ver else "dev"
@@ -298,7 +313,6 @@ def main() -> None:
     )
 
     subparsers = parser.add_subparsers(dest="command")
-
     list_parser = subparsers.add_parser("list", help="List all available skills.")
     list_parser.add_argument(
         "--skills-root",
@@ -318,6 +332,10 @@ def main() -> None:
     )
 
     args = parser.parse_args()
+
+    if args.help and args.command is None:
+        cmd_help(Console())
+        return
 
     if args.command == "list":
         cmd_list(

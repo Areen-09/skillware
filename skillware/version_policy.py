@@ -41,7 +41,7 @@ def should_emit_unsupported_advisory(installed: Version) -> bool:
 def format_unsupported_message(installed: Version) -> str:
     return (
         f"Skillware {installed} is unsupported. "
-        f'Upgrade to >={UPGRADE_TARGET}: pip install -U "skillware[cli]"'
+        f"Upgrade to >={UPGRADE_TARGET}: pip install -U skillware"
     )
 
 

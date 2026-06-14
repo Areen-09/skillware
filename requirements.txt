@@ -2,7 +2,6 @@
 # Installs core + dev tools (pytest, flake8, black) + all optional SDK extras.
 # For production installs use pyproject.toml extras instead, e.g.:
 #   pip install skillware                  # core only
-#   pip install "skillware[cli]"           # + rich terminal
 #   pip install "skillware[gemini]"        # + Google Gemini SDK
 #   pip install "skillware[claude]"        # + Anthropic SDK
 #   pip install "skillware[openai]"        # + OpenAI SDK

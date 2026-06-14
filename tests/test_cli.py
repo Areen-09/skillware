@@ -6,6 +6,8 @@ from skillware.cli import (
     cmd_help,
 )
 
+import pytest
+
 
 def test_discover_skills_returns_skills(tmp_path):
     # Create a fake skill directory structure
@@ -260,3 +262,20 @@ def test_interactive_help_dispatches_to_cmd_help(monkeypatch):
     output = buf.getvalue()
     assert "--category" in output
     assert "--issuer" in output
+
+
+def test_version_flag(capsys):
+    """skillware --version should print the installed version and exit."""
+    import sys
+    from skillware.cli import main
+
+    monkeypatch_argv = sys.argv
+    sys.argv = ["skillware", "--version"]
+    try:
+        with pytest.raises(SystemExit):
+            main()
+    finally:
+        sys.argv = monkeypatch_argv
+
+    captured = capsys.readouterr()
+    assert "skillware" in captured.out.lower()

@@ -100,11 +100,16 @@ pip install -e .
 ### 2. Verify your installation
 
 ```bash
-pip install "skillware[cli]"
 skillware list
 ```
 
-This prints a table of all locally available skills and confirms the install and path resolution are working. Running `skillware` with no arguments opens the interactive menu.
+This prints a table of all locally available skills and confirms the install
+and path resolution are working. Running `skillware` with no arguments opens
+the interactive menu.
+
+If `skillware` is not recognized, Python's `Scripts` directory may not be on
+your PATH — use `python -m skillware list` as a fallback. See
+[CLI Reference](docs/usage/cli.md#running-the-cli) for details.
 
 ### 3. Configuration
 

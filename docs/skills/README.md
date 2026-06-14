@@ -2,7 +2,7 @@
 
 Welcome to the official catalog of Skillware capabilities. New here? Start with the [project README](../../README.md).
 
-Browse by category below, or run `skillware list` after `pip install "skillware[cli]"` to see locally available skills.
+Browse by category below, or run `skillware list` after `pip install skillware` to see locally available skills.
 
 ## Office
 Skills for document processing, email automation, and productivity.
