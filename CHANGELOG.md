@@ -8,6 +8,8 @@ Contributors add user-facing entries under `[Unreleased]` in the same PR. Mainta
 
 ## [Unreleased]
 
+## [0.3.6] - 2026-06-15
+
 ### Added
 - **Tests**: Backfilled `test_skill.py` for six registry skills (`mica_module`, `pii_masker`, `synthetic_generator`, `wallet_screening`, `pdf_form_filler`, `prompt_rewriter`); all registry skills now ship co-located bundle tests. Fixed `prompt_rewriter` package export so pytest can collect the bundle (#158).
 - **CLI**: `skillware/__main__.py` enables `python -m skillware` as a fallback when the `skillware` command is not on PATH (#135). Added `cmd_help()` for rich-formatted help, wired to `skillware --help`/`-h` and interactive menu option `4`. Added `--version`/`-V` flag.
