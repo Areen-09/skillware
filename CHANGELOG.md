@@ -8,6 +8,8 @@ Contributors add user-facing entries under `[Unreleased]` in the same PR. Mainta
 
 ## [Unreleased]
 
+## [0.3.7] - 2026-06-22
+
 ### Added
 - **`wellness/mental_coach`**: Deterministic wellness coaching firewall with crisis triage, hard scope limits, embedded public KB, optional Gemini scope evaluator, and catalog documentation (#148).
 
