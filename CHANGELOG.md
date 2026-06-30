@@ -8,17 +8,20 @@ Contributors add user-facing entries under `[Unreleased]` in the same PR. Mainta
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-06-30
+
 ### Added
 
-- **`monitoring/token_limiter`**: New monitoring skill that evaluates cumulative token usage and returns CONTINUE, WARN, or FORCE_TERMINATE for autonomous agent loops; bundled indicative model pricing, ROI scaffold fields for v2, local and provider loop examples (#23).
-- **Tests**: `tests/test_registry_docs.py` — CI doc-drift guards that verify skill catalog, examples index, and agent-loops reference matrix stay in sync with the registry (#183).
-- **Documentation**: Cross-linked `tests/test_registry_docs.py` in `ai_native_workflow.md` and `CONTRIBUTING.md` so contributors know doc-drift guards run in CI; added explicit PR checklist reminder in `CONTRIBUTING.md` (#193).
+- **`monitoring/token_limiter`**: New monitoring skill that evaluates cumulative token usage and returns CONTINUE, WARN, or FORCE_TERMINATE for autonomous agent loops; bundled indicative model pricing, ROI scaffold fields for v2, local and provider loop examples (#23, #207).
+- New **`monitoring`** skill category in CONTRIBUTING, `ai_native_workflow.md`, and `docs/skills/README.md`.
+- **Tests**: `tests/test_registry_docs.py` — CI doc-drift guards that verify skill catalog, examples index, and agent-loops reference matrix stay in sync with the registry (#183, #189).
+- **Documentation**: Cross-linked `tests/test_registry_docs.py` in `ai_native_workflow.md` and `CONTRIBUTING.md` so contributors know doc-drift guards run in CI; added explicit PR checklist reminder in `CONTRIBUTING.md` (#193, #197).
 
 ### Changed
 
 - **Documentation**: `docs/skills/token_limiter.md` — budget disclaimer callout, limitations clarity, and enterprise disclaimer (#23).
-- **Documentation**: README Stats section and live PyPI download badges (pepy / PyPI Stats dashboards, header `DLs ↓` total).
-- **Documentation**: Aligned CLI and examples docs (`docs/usage/cli.md`, `examples/README.md`, `docs/vision.md`, `README.md`) with the `skillware test` / `skillware examples` behavior shipped in 0.3.8–0.3.9 (#191).
+- **Documentation**: README Stats section and live PyPI download badges (pepy / PyPI Stats dashboards, header `DLs ↓` total) (#198).
+- **Documentation**: Aligned CLI and examples docs (`docs/usage/cli.md`, `examples/README.md`, `docs/vision.md`, `README.md`) with the `skillware test` / `skillware examples` behavior (#191, #194).
 
 ## [0.3.9] - 2026-06-26
 
